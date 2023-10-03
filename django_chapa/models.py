@@ -3,27 +3,30 @@ from uuid import uuid4
 
 
 class ChapaStatus(models.TextChoices):
+    CREATED = 'created', 'CREATED'
     PENDING = 'pending', 'PENDING'
     SUCCESS = 'success', 'SUCCESS'
-    CREATED = 'created', 'CREATED'
     FAILED = 'failed', 'FAILED'
 
 
 class ChapaTransactionMixin(models.Model):
+    "inherit this model and add your own extra fields"
     id = models.UUIDField(primary_key=True, default=uuid4)
 
     amount = models.FloatField()
     currency = models.CharField(max_length=25, default='ETB')
     email = models.EmailField()
+    phone_number = models.CharField(max_length=25)
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
-    description = models.TextField()
 
-    event = models.CharField(max_length=255, null=True, blank=True)
+    payment_title = models.CharField(max_length=255, default='Payment')
+    description = models.TextField()
 
     status = models.CharField(max_length=50, choices=ChapaStatus.choices, default=ChapaStatus.CREATED)
 
-    response_dump = models.JSONField(default=dict)  # incase the response is valuable in the future
+    response_dump = models.JSONField(default=dict, blank=True)  # incase the response is valuable in the future
+    checkout_url = models.URLField(null=True, blank=True)
 
     class Meta:
         abstract = True
@@ -40,9 +43,6 @@ class ChapaTransactionMixin(models.Model):
             'last_name': self.last_name,
             'description': self.description
         }
-
-# TODO: add non abstract model
-
 
 class ChapaTransaction(ChapaTransactionMixin):
     pass
